@@ -1,6 +1,5 @@
 # 3Dera-JS
 
-
 [![npm package][npm-img]][npm-url]
 [![Build Status][build-img]][build-url]
 [![Downloads][downloads-img]][downloads-url]
@@ -21,6 +20,11 @@ npm install @kedos-srl/3dera-js
 
 ```ts
 import HederaJS from '3dera-js';
+
+const canvas = document.getElementById('3dera-canvas') as HTMLCanvasElement;
+await HederaJS.init(canvas);
+await HederaJS.start();
+
 ```
 
 [npm-img]: https://img.shields.io/npm/v/@kedos-srl/3dera-js
