@@ -25,6 +25,7 @@ const canvas = document.getElementById('3dera-canvas') as HTMLCanvasElement;
 await HederaJS.init(canvas);
 await HederaJS.start();
 
+
 ```
 
 [npm-img]: https://img.shields.io/npm/v/@kedos-srl/3dera-js
