@@ -16,6 +16,10 @@
 npm install @kedos-srl/3dera-js
 ```
 
+## Documentation
+
+To see all available API options, take a look at the [documentation](https://kedos-srl.github.io/3dera-doc/)
+
 ## Usage
 
 ```ts
@@ -24,7 +28,6 @@ import HederaJS from '3dera-js';
 const canvas = document.getElementById('3dera-canvas') as HTMLCanvasElement;
 await HederaJS.init(canvas);
 await HederaJS.start();
-
 ```
 
 [npm-img]: https://img.shields.io/npm/v/@kedos-srl/3dera-js

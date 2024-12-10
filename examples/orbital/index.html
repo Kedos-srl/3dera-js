@@ -1,0 +1,65 @@
+<html>
+
+<head>
+  <title>Orbital Clock</title>
+</head>
+
+<body>
+
+  <canvas width="1000" height="500" id="canvas"></canvas>
+
+  <script src="../../dist/edera_0.1.js"></script>
+  <script src="../../dist/hedera.js"></script>
+  <script>
+
+    var scene = {
+      assets: {
+        images: [
+          {
+            id: 'bg-panorama',
+            type: 'panorama',
+            ibl: 'low',
+            alpha: 'opaque',
+            url: 0
+          }
+        ],
+        glb: [
+          {
+            url: 1
+          }
+        ],
+        url: ['01_duomo_entrata.jpg', 'AlarmClock.glb']
+      },
+      collectors: {
+        rooms: [
+          {
+            id: 'room_1',
+            image_id: 'bg-panorama',
+            size: 100,
+            renderable: true,
+            rotation: [0, 0, 0]
+          }
+        ],
+        widgets: [],
+        spritesheets: []
+      }
+    };
+
+    var assetUrls = [
+      './01_duomo_entrata.jpg',
+      './AlarmClock.glb'
+    ];
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      var canvas = document.getElementById('canvas');
+      console.log('HederaJS', canvas);
+      await HederaJS.init(canvas);
+
+
+      await HederaJS.start('orbit');
+      await HederaJS.loadScene(scene, assetUrls);
+    });
+  </script>
+</body>
+
+</html>
