@@ -25,13 +25,10 @@ describe('HederaJS', () => {
       expect(HederaJS.onMouseMove).toBeDefined();
     });
     it('HederaJS.fetchAndLoadAssets should be declared', () => {
-      expect(HederaJS.fetchAndLoadAssets).toBeDefined();
+      expect(HederaJS.loadScene).toBeDefined();
     });
     it('HederaJS.getDeltaTime should be declared', () => {
-      expect(HederaJS.getDeltaTime).toBeDefined();
-    });
-    it('HederaJS.hexToRgb should be declared', () => {
-      expect(HederaJS.hexToRgb).toBeDefined();
+      expect(HederaJS.deltaTime).toBeDefined();
     });
   });
 });
