@@ -3,6 +3,7 @@ import Hammer from 'hammerjs';
 // @ts-ignore
 import '../core/edera_0.1.js';
 // @ts-ignore
+// @jes
 import wasmBase64 from '../core/edera_0.1.wasm';
 import { IHedera } from './model/ihedera';
 import { IHederaCoreEntity } from './model/ihederacoreentity';
@@ -201,6 +202,59 @@ export default class HederaJS {
     HederaJS.world.mainLoopResume();
   }
 
+  private static loadEntities(jsonData: ISceneDescriptor) {
+    this.mapEntities.clear();
+    for (const room of jsonData.collectors.rooms) {
+      const coreEntity = HederaJS.getCoreEntity(room.id);
+      if (coreEntity) {
+        this.mapEntities.set(coreEntity.id, {
+          id: room.id,
+          position: { x: 0, y: 0 },
+          rotation: {
+            x: room.rotation[0],
+            y: room.rotation[1],
+            z: room.rotation[2],
+          },
+          scale: { x: room.size, y: room.size, z: room.size },
+          distance: undefined,
+          alpha: 1,
+          visible: room.renderable,
+          dragEnabled: false,
+        });
+      }
+    }
+    for (const widget of jsonData.collectors.widgets) {
+      const coreEntity = HederaJS.getCoreEntity(widget.id);
+      if (coreEntity) {
+        this.mapEntities.set(coreEntity.id, {
+          id: widget.id,
+          position: { x: widget.position[0], y: widget.position[1] },
+          rotation: { x: 0, y: 0, z: 0 },
+          scale: { x: widget.size[0], y: widget.size[1], z: widget.size[2] },
+          distance: widget.distance,
+          alpha: 1,
+          visible: widget.renderable,
+          dragEnabled: false,
+        });
+      }
+    }
+    for (const spritesheet of jsonData.collectors.spritesheets) {
+      const coreEntity = HederaJS.getCoreEntity(spritesheet.id);
+      if (coreEntity) {
+        this.mapEntities.set(coreEntity.id, {
+          id: spritesheet.id,
+          position: { x: spritesheet.sprite[0], y: spritesheet.sprite[1] },
+          rotation: { x: 0, y: 0, z: 0 },
+          scale: { x: spritesheet.size[0], y: spritesheet.size[1], z: 1 },
+          distance: undefined,
+          alpha: 1,
+          visible: spritesheet.renderable,
+          dragEnabled: false,
+        });
+      }
+    }
+  }
+
   /**
    * @param id - Entity ID
    * @returns {id: number} - Entity Core of HederaJS, contains only the internal id of Hedera
@@ -281,16 +335,17 @@ export default class HederaJS {
       canvas.addEventListener('contextmenu', e => e.preventDefault());
       HederaJS.canvas = canvas;
 
-      const base64Clean = wasmBase64.replace(
+      const base64Clean = (wasmBase64 as string).replace(
         /^data:[a-zA-Z]*\/[a-zA-Z]*;base64,/,
         ''
       );
       const wasmBlob = HederaJS.base64ToBlob(base64Clean);
       const wasmUrl = URL.createObjectURL(wasmBlob);
 
-      (window as any).Hedera.start(canvas, wasmUrl);
+      HederaJS.Hedera = (window as { [key: string]: any })['Hedera'];
+      HederaJS.Hedera.start(canvas, wasmUrl);
       window.addEventListener('on_hedera_startup', () => {
-        HederaJS.Hedera = (window as any).Hedera;
+        HederaJS.Hedera = (window as { [key: string]: any })['Hedera'];
         HederaJS.Hedera.update = () => undefined;
         resolve(HederaJS.Hedera);
         HederaJS.rect = canvas.getBoundingClientRect();
@@ -445,7 +500,7 @@ export default class HederaJS {
     for (const url of assetsUrls) {
       const filename = url.split('/').pop();
       const file = await fetch(url);
-      if (file.ok && filename) {
+      if (filename && file.ok) {
         zip.file(filename, file.blob());
       } else {
         console.error('Error loading file: ' + url);
@@ -453,60 +508,35 @@ export default class HederaJS {
       }
     }
     const zipHedera = await zip.generateAsync({ type: 'arraybuffer' });
-
     this.loadAssets({ arrayBuffer: zipHedera, type: 'ZIP' });
-
-    this.mapEntities.clear();
-    for (const room of jsonData.collectors.rooms) {
-      const coreEntity = HederaJS.getCoreEntity(room.id);
-      if (coreEntity) {
-        this.mapEntities.set(coreEntity.id, {
-          id: room.id,
-          position: { x: 0, y: 0 },
-          rotation: {
-            x: room.rotation[0],
-            y: room.rotation[1],
-            z: room.rotation[2],
-          },
-          scale: { x: room.size, y: room.size, z: room.size },
-          distance: undefined,
-          alpha: 1,
-          visible: room.renderable,
-          dragEnabled: false,
-        });
-      }
-    }
-    for (const widget of jsonData.collectors.widgets) {
-      const coreEntity = HederaJS.getCoreEntity(widget.id);
-      if (coreEntity) {
-        this.mapEntities.set(+coreEntity.id, {
-          id: widget.id,
-          position: { x: widget.position[0], y: widget.position[1] },
-          rotation: { x: 0, y: 0, z: 0 },
-          scale: { x: widget.size[0], y: widget.size[1], z: widget.size[2] },
-          distance: widget.distance,
-          alpha: 1,
-          visible: widget.renderable,
-          dragEnabled: false,
-        });
-      }
-    }
-    for (const spritesheet of jsonData.collectors.spritesheets) {
-      const coreEntity = HederaJS.getCoreEntity(spritesheet.id);
-      if (coreEntity) {
-        this.mapEntities.set(+coreEntity.id, {
-          id: spritesheet.id,
-          position: { x: spritesheet.sprite[0], y: spritesheet.sprite[1] },
-          rotation: { x: 0, y: 0, z: 0 },
-          scale: { x: spritesheet.size[0], y: spritesheet.size[1], z: 1 },
-          distance: undefined,
-          alpha: 1,
-          visible: spritesheet.renderable,
-          dragEnabled: false,
-        });
-      }
-    }
+    this.loadEntities(jsonData);
     return true;
+  }
+
+  /**
+   * Load a scene into HederaJS from a ZIP file.
+   * @param zipFileArrayBuffer ArrayBuffer containing the ZIP file.
+   *
+   * zip file must contain:
+   * - data.json: JSON file containing the description of the scene ( images, 3D models, rooms, widgets, spritesheets )
+   * - assets in the root of the zip file
+   *
+   * @returns {Promise<boolean>} - True if the scene has been loaded correctly, false otherwise
+   */
+  public static async loadSceneArchive(
+    zipFileArrayBuffer: ArrayBuffer
+  ): Promise<boolean> {
+    const zip = new JSZip();
+    const zipFile = await zip.loadAsync(zipFileArrayBuffer);
+    const jsonDataFile = zipFile.file('data.json');
+    if (jsonDataFile) {
+      const jsonData = JSON.parse(await jsonDataFile.async('text'));
+      this.loadAssets({ arrayBuffer: zipFileArrayBuffer, type: 'ZIP' });
+      this.loadEntities(jsonData);
+      return true;
+    }
+    console.error('data.json not found in ZIP file');
+    return false;
   }
 
   /**

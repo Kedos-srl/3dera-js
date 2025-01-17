@@ -76,6 +76,8 @@
     "src/*.ts",
     "../package.json",
     "../README.md",
-    "../LICENSE"
-  ]
+    "../LICENSE",
+    "jest.config.js"
+  ],
+  "exclude": ["**/*.wasm", "__mocks__/*.js"]
 }
