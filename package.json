@@ -1,6 +1,6 @@
 {
   "name": "@kedos-srl/3dera-js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A blazing fast powerful tool for 3D visualization with WASM engine",
   "type": "commonjs",
   "module": "hedera.js",

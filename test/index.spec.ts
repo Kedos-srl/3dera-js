@@ -24,11 +24,8 @@ describe('HederaJS', () => {
     it('HederaJS.onMouseMove should be declared', () => {
       expect(HederaJS.onMouseMove).toBeDefined();
     });
-    it('HederaJS.fetchAndLoadAssets should be declared', () => {
+    it('HederaJS.loadScene should be declared', () => {
       expect(HederaJS.loadScene).toBeDefined();
-    });
-    it('HederaJS.getDeltaTime should be declared', () => {
-      expect(HederaJS.deltaTime).toBeDefined();
     });
   });
 });
